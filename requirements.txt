@@ -1,0 +1,4 @@
+requests==2.20.0
+praw==5.2.0
+lxml==4.1.1
+TinyDB==3.15.2
