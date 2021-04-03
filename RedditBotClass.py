@@ -108,7 +108,7 @@ class RedditBot(object):
         return text
 
     def __format_post_title(self, cardData):
-        msg = "[COTD] "
+        msg = "[COTW] "
         msg += cardData["name"]
         msg += " (" + date.today().strftime("%Y/%m/%d") + ")"
         return msg
@@ -127,7 +127,7 @@ class RedditBot(object):
         if (cardData.get("phoenixborn")):
             msg += "* **Phoenixborn: " + cardData["phoenixborn"] + "**\n\n"
         if (cardData.get("battlefield")):
-            msg += "* **Battlefield: " + cardData["battlefield"] + "**\n\n"
+            msg += "* **Battlefield: " + str(cardData["battlefield"]) + "**\n\n"
         if (cardData.get("attack")):
             msg += "* **Attack: " + str(cardData["attack"]) + "**\n\n"
         if (cardData.get("life")):
@@ -156,16 +156,20 @@ class RedditBot(object):
             msg += "]\n\n"
 
         if (cardData.get("text")):
-            text = cardData["text"].replace("*", "")
-            if (cardData.get("conjurations")):
-                for conjuration in cardData["conjurations"]:
-                    text = text.replace("[[" + conjuration["name"] + "]]", "[" + conjuration["name"] +
-                                            "](https://ashes.live/cards/" + conjuration["stub"] + "/)")
-            otherMatches = re.findall('\[\[(.*?)\]\]', text)
-            for match in otherMatches:
-                text = text.replace("[[" + match + "]]", self.make_pretty_cost(match))
-            msg += text + "\n\n"
-
+            for text in cardData["text"].split("\n\n"):
+                realText = text
+                if (text.startswith("~")):
+                    realText = realText.replace("~", "(Reaction Ability)")
+                if (text.startswith("*")):
+                    realText = realText.replace("*", "(Inexhaustible)")
+                if (cardData.get("conjurations")):
+                    for conjuration in cardData["conjurations"]:
+                        realText = realText.replace("[[" + conjuration["name"] + "]]", "[" + conjuration["name"] +
+                                                "](https://ashes.live/cards/" + conjuration["stub"] + "/)")
+                otherMatches = re.findall('\[\[(.*?)\]\]', realText)
+                for match in otherMatches:
+                    realText = realText.replace("[[" + match + "]]", self.make_pretty_cost(match))
+                msg += realText + "\n\n"
         if (cardData.get("release")):
             msg += "***" + cardData["release"]["name"] + "***\n\n"
 
